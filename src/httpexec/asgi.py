@@ -41,7 +41,7 @@ async def run(command):
     :return: response
     """
     pipes = dict.fromkeys(("stdin", "stdout", "stderr"), PIPE)
-    params = await request.json
+    params = await request.json or {}
     try:
         stdin = params["stdin"].encode()
         if params.get("stdin_encode", False):
@@ -58,7 +58,7 @@ async def run(command):
     if not command.is_relative_to(root) or not command.is_file():
         # Only allow commands within the configured root path.
         return f"Access denied to `{command}`", FORBIDDEN
-    argv = [str(command)] + params["args"]
+    argv = [str(command)] + params.get("args", [])
     process = await create_subprocess_exec(*argv, **pipes)
     stdout, stderr = await process.communicate(stdin)
     if params.get("stdout_encode", False):

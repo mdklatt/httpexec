@@ -3,9 +3,6 @@
 """
 from base64 import b64decode
 from http.client import OK, FORBIDDEN
-from pathlib import Path
-from sys import executable
-
 
 import pytest
 from httpexec.asgi import *  # test __all__
@@ -18,7 +15,7 @@ def client():
     :yield: test client
     """
     app.config.from_mapping({
-        "ROOT": Path(executable).parent
+        "ROOT": "/bin"
     })
     yield app.test_client()
     for user_key in "ROOT", "UNSAFE":
@@ -31,25 +28,20 @@ def client():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("command", "unsafe", "status"), (
-    ("python", True, OK),
-    ("/python", True, OK),  # Quart strips leading slashes
-    ("../python", True, FORBIDDEN),  # don't escape root
-    ("does_not_exist", True, FORBIDDEN),
-    ("python", False, FORBIDDEN),
+@pytest.mark.parametrize(("command", "status"), (
+    ("ls", OK),
+    ("/ls", OK),  # Quart strips leading slashes
+    ("../ls", FORBIDDEN),  # cannot leave root
+    ("does_not_exist", FORBIDDEN),
 ))
-async def test_command(client, command, unsafe, status):
+async def test_command(client, command, status):
     """ Test command execution.
 
     """
     params = {
-        "args": ["-m", "pip", "--version"],
+        "args": ["-p"],
         "stdout_encode": True,
     }
-    if unsafe:
-        # Do not define value for safe requests to verify that requests are
-        # safe by default.
-        app.config["UNSAFE"] = True
     response = await client.post(command, json=params)
     assert response.status_code == status
     if status == OK:
@@ -57,7 +49,29 @@ async def test_command(client, command, unsafe, status):
         assert data["return"] == 0
         assert data["stderr"] == ""
         stdout = b64decode(data["stdout"]).decode()
-        assert stdout.find("pip") != -1
+        assert "tests/" in stdout.split("\n")
+    return
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("unsafe", "status"), (
+    (True, OK),
+    (False, FORBIDDEN),  # Quart strips leading slashes
+))
+async def test_command_symlink(client, tmp_path, unsafe, status):
+    """ Test command execution with symbolic links.
+
+    """
+    app.config.from_mapping({
+        "ROOT": tmp_path,
+    })
+    if unsafe:
+        # Do not define value for safe requests to verify that requests are
+        # safe by default.
+        app.config["UNSAFE"] = True
+    tmp_path.joinpath("ls").symlink_to("/bin/ls")
+    response = await client.post("ls")
+    assert response.status_code == status
     return
 
 
