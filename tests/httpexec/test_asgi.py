@@ -14,17 +14,10 @@ def client():
 
     :yield: test client
     """
-    app.config.from_mapping({
-        "ROOT": "/bin"
-    })
-    yield app.test_client()
-    for user_key in "ROOT", "UNSAFE":
-        # Reset config after each test.
-        try:
-            del app.config[user_key]
-        except KeyError:
-            pass
-    return
+    app.config["TESTING"] = True
+    app.config["ROOT_PATH"] = "/bin"
+    app.config["FOLLOW_LINKS"] = False
+    return app.test_client()
 
 
 @pytest.mark.asyncio
@@ -54,21 +47,18 @@ async def test_command(client, command, status):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("unsafe", "status"), (
+@pytest.mark.parametrize(("follow", "status"), (
     (True, OK),
     (False, FORBIDDEN),  # Quart strips leading slashes
 ))
-async def test_command_symlink(client, tmp_path, unsafe, status):
+async def test_symlinks(client, tmp_path, follow, status):
     """ Test command execution with symbolic links.
 
     """
-    app.config.from_mapping({
-        "ROOT": tmp_path,
+    app.config.update({
+        "ROOT_PATH": tmp_path,
+        "FOLLOW_LINKS": follow
     })
-    if unsafe:
-        # Do not define value for safe requests to verify that requests are
-        # safe by default.
-        app.config["UNSAFE"] = True
     tmp_path.joinpath("ls").symlink_to("/bin/ls")
     response = await client.post("ls")
     assert response.status_code == status

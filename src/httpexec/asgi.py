@@ -4,7 +4,6 @@
 from asyncio.subprocess import create_subprocess_exec, PIPE
 from base64 import b64decode, b64encode
 from http.client import FORBIDDEN
-from os import environ
 from pathlib import Path
 from quart import Quart, jsonify, request
 
@@ -13,10 +12,15 @@ __all__ = "app",
 
 
 app = Quart(__name__)
-app.config.from_mapping({
-    # TODO: What should the default be? Should there be a default?
-    "ROOT": Path(environ["HOME"], "bin")  # valid for unidata-ldm container
-})
+
+
+@app.before_first_request
+def config():
+    """ Get configuration settings.
+
+    """
+    app.config.from_prefixed_env("HTTPEXEC")
+    return
 
 
 @app.route("/<path:command>", methods=["POST"])
@@ -40,6 +44,7 @@ async def run(command):
     :param command: command path to execute
     :return: response
     """
+    # TODO: This is getting too long.
     pipes = dict.fromkeys(("stdin", "stdout", "stderr"), PIPE)
     params = await request.json or {}
     try:
@@ -50,9 +55,9 @@ async def run(command):
     except KeyError:
         stdin = None
         pipes["stdin"] = None
-    root = Path(app.config["ROOT"]).resolve()
+    root = Path(app.config["ROOT_PATH"]).resolve()  # ROOT_PATH must be defined
     command = root.joinpath(command)
-    if not app.config.get("UNSAFE", False):
+    if not app.config.get("FOLLOW_LINKS", False):
         # Command must be under root after following links.
         command = command.resolve()
     if not command.is_relative_to(root) or not command.is_file():
