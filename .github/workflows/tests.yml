@@ -1,4 +1,4 @@
-name: Test
+name: Tests
 
 on:
   push:
@@ -26,4 +26,4 @@ jobs:
       - name: Install application
         run: python -m pip install .
       - name: Run tests
-        run: python -m pytest tests/httpexec
+        run: python -m pytest tests/unit

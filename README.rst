@@ -23,12 +23,6 @@ Minimum Requirements
 - Python 3.9+
 
 
-Optional Requirements
-=====================
-
-- `pytest`_ (for running the test suite)
-- `Sphinx`_ (for generating documentation)
-
 
 Basic Setup
 ===========
@@ -61,8 +55,8 @@ Build documentation:
     $ sphinx-build -b html doc doc/_build/html
 
 
-.. _GitHub Actions: https://github.com/mdklatt/httpexec/actions/workflows/test.yml
-.. |badge| image:: https://github.com/mdklatt/httpexec/actions/workflows/test.yml/badge.svg
+.. _GitHub Actions: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml
+.. |badge| image:: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml/badge.svg
     :alt: GitHub Actions test status
     :target: `GitHub Actions`_
 .. _EXPOSE: https://docs.docker.com/engine/reference/builder/#expose
