@@ -1,4 +1,0 @@
-## Runtime configuration for the httpexec application.
-##
-core:
-  logging: WARN

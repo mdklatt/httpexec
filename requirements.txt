@@ -1,3 +1,4 @@
 python-dotenv==0.20.0
 PyYAML==6.0
 quart==0.17.0
+toml==0.10.2

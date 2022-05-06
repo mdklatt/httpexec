@@ -3,6 +3,7 @@
 """
 from base64 import b64decode
 from http.client import OK, FORBIDDEN
+from os import environ
 
 import pytest
 from httpexec.asgi import *  # test __all__
@@ -14,9 +15,10 @@ def client():
 
     :yield: test client
     """
-    app.config["TESTING"] = True
-    app.config["ROOT_PATH"] = "/bin"
-    app.config["FOLLOW_LINKS"] = False
+    environ.update({
+        "QUART_TESTING": "1",
+        "HTTPEXEC_EXEC_ROOT": "/bin",
+    })
     return app.test_client()
 
 
@@ -56,7 +58,7 @@ async def test_symlinks(client, tmp_path, follow, status):
 
     """
     app.config.update({
-        "ROOT_PATH": tmp_path,
+        "EXEC_ROOT": tmp_path,
         "FOLLOW_LINKS": follow
     })
     tmp_path.joinpath("ls").symlink_to("/bin/ls")

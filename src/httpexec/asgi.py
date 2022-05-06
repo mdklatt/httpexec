@@ -4,8 +4,10 @@
 from asyncio.subprocess import create_subprocess_exec, PIPE
 from base64 import b64decode, b64encode
 from http.client import FORBIDDEN
+from os import environ
 from pathlib import Path
 from quart import Quart, jsonify, request
+from toml import load
 
 
 __all__ = "app",
@@ -19,6 +21,10 @@ def config():
     """ Get configuration settings.
 
     """
+    # Environment variables take precedence over the config file. Config file
+    # keys must be ALL CAPS and at the root level.
+    file = Path(environ.get("HTTPEXEC_CONFIG_PATH",  "etc/config.toml"))
+    app.config.from_file(Path.cwd() / file, load)
     app.config.from_prefixed_env("HTTPEXEC")
     return
 
@@ -55,7 +61,7 @@ async def run(command):
     except KeyError:
         stdin = None
         pipes["stdin"] = None
-    root = Path(app.config["ROOT_PATH"]).resolve()  # ROOT_PATH must be defined
+    root = Path(app.config["EXEC_ROOT"]).resolve()  # ROOT_PATH must be defined
     command = root.joinpath(command)
     if not app.config.get("FOLLOW_LINKS", False):
         # Command must be under root after following links.
