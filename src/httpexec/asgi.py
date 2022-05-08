@@ -61,7 +61,7 @@ async def run(command):
     except KeyError:
         stdin = None
         pipes["stdin"] = None
-    root = Path(app.config["EXEC_ROOT"]).resolve()  # ROOT_PATH must be defined
+    root = Path(app.config["EXEC_ROOT"]).resolve()  # EXEC_ROOT must be defined
     command = root.joinpath(command)
     if not app.config.get("FOLLOW_LINKS", False):
         # Command must be under root after following links.
