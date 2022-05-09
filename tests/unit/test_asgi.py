@@ -1,7 +1,7 @@
 """ Test suite for the asgi module.
 
 """
-from base64 import b64decode
+from base64 import a85decode, b64decode
 from http.client import OK, FORBIDDEN
 from os import environ
 
@@ -23,27 +23,31 @@ def client():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("command", "status"), (
+@pytest.mark.parametrize(("endpoint", "status"), (
     ("ls", OK),
     ("/ls", OK),  # Quart strips leading slashes
     ("../ls", FORBIDDEN),  # cannot leave root
     ("does_not_exist", FORBIDDEN),
 ))
-async def test_command(client, command, status):
+@pytest.mark.parametrize(("encode", "decoder"), (
+    ("base64", b64decode),
+    ("base85", a85decode),
+))
+async def test_command(client, endpoint, status, encode, decoder):
     """ Test command execution.
 
     """
     params = {
         "args": ["-p"],
-        "stdout_encode": True,
+        "binary": {"stdout": encode},
     }
-    response = await client.post(command, json=params)
+    response = await client.post(endpoint, json=params)
     assert response.status_code == status
     if status == OK:
         data = await response.json
         assert data["return"] == 0
         assert data["stderr"] == ""
-        stdout = b64decode(data["stdout"]).decode()
+        stdout = decoder(data["stdout"]).decode()
         assert "tests/" in stdout.split("\n")
     return
 
