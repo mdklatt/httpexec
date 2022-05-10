@@ -1,7 +1,7 @@
 """ Test suite for the asgi module.
 
 """
-from base64 import a85decode, b64decode
+from base64 import a85decode, a85encode, b64decode, b64encode
 from http.client import OK, FORBIDDEN
 from os import environ
 
@@ -24,22 +24,23 @@ def client():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("endpoint", "status"), (
-    ("ls", OK),
-    ("/ls", OK),  # Quart strips leading slashes
-    ("../ls", FORBIDDEN),  # cannot leave root
+    ("cat", OK),
+    ("/cat", OK),  # Quart strips leading slashes
+    ("../cat", FORBIDDEN),  # cannot leave root
     ("does_not_exist", FORBIDDEN),
 ))
-@pytest.mark.parametrize(("encode", "decoder"), (
-    ("base64", b64decode),
-    ("base85", a85decode),
+@pytest.mark.parametrize(("scheme", "encode", "decode"), (
+    ("base64", b64encode, b64decode),
+    ("base85", a85encode, a85decode),
 ))
-async def test_command(client, endpoint, status, encode, decoder):
+async def test_command(client, endpoint, status, scheme, encode, decode):
     """ Test command execution.
 
     """
     params = {
-        "args": ["-p"],
-        "binary": {"stdout": encode},
+        "args": ["-n"],
+        "stdin": encode(b"abc").decode(),
+        "binary": dict.fromkeys(("stdin", "stdout"), scheme)
     }
     response = await client.post(endpoint, json=params)
     assert response.status_code == status
@@ -47,15 +48,15 @@ async def test_command(client, endpoint, status, encode, decoder):
         data = await response.json
         assert data["return"] == 0
         assert data["stderr"] == ""
-        stdout = decoder(data["stdout"]).decode()
-        assert "tests/" in stdout.split("\n")
+        stdout = decode(data["stdout"]).decode()
+        assert stdout.strip() == "1\tabc"
     return
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("follow", "status"), (
     (True, OK),
-    (False, FORBIDDEN),  # Quart strips leading slashes
+    (False, FORBIDDEN),
 ))
 async def test_symlinks(client, tmp_path, follow, status):
     """ Test command execution with symbolic links.
@@ -65,8 +66,8 @@ async def test_symlinks(client, tmp_path, follow, status):
         "EXEC_ROOT": tmp_path,
         "FOLLOW_LINKS": follow
     })
-    tmp_path.joinpath("ls").symlink_to("/bin/ls")
-    response = await client.post("ls")
+    tmp_path.joinpath("cat").symlink_to("/bin/cat")
+    response = await client.post("cat")
     assert response.status_code == status
     return
 

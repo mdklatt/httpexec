@@ -100,7 +100,12 @@ async def _exec(argv: Sequence, stdin=None, binary=None):
     pipes = dict.fromkeys(("stdout", "stderr"), PIPE)
     if stdin is not None:
         pipes["stdin"] = PIPE
-        stdin = _decodings["stdin"](stdin) if "stdin" in binary else stdin.encode()
+        try:
+            scheme = binary["stdin"]
+        except KeyError:
+            stdin = stdin.encode()
+        else:
+            stdin = _decodings[scheme](stdin)
     process = await create_subprocess_exec(*argv, **pipes)
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
     for stream in set(output) & set(binary or {}):
