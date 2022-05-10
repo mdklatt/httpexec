@@ -46,27 +46,40 @@ def config():
 async def run(command):
     """ Run an arbitrary command.
 
-    The request content must be a JSON object with an "args" attribute whose
-    value is a list of arguments to pass to `command` and an
-    optional "stdin" attribute that is a base64-encoded data string that will
-    be passed to the command vi STDIN.
+    The optional POST content is a JSON object with any of these attributes:
 
-    The response will be the base64-encoded contents of STDOUT; the contents of
-    STDIN as text; and the process return code. An HTTP status code of OK only
-    means that a valid response was returned, *NOT* that the underlying command
-    was successful.
+      "args":   a list of arguments to pass to `command`
+      "stdin":  contents of STDIN to pipe to `command`
+      "binary": an object specifying any binary encodings to use for "stdin"
+                in this request and "stdout" or "stderr" in the response
 
-    The first value of "argv" is the command to execute; this must be relative
-    to the configured root path or the response will be FORBIDDEN.
+    The response is a JSON object with these attributes:
+
+      "return": the exit status returned by `command`
+      "stdout": the contents of STDOUT from `command`
+      "stderr": the contents of STDERR from `command`
+
+    An HTTP status of `OK` does not mean that `command` itself was successful;
+    always check the value of "return" in the response object.
+
+    If the contents of STDIN, STDERR, or STDOUT ar binary, they must be encoded
+    as text for transmission. The "binary" object in the request is used to
+    specify the scheme to use for each stream, if any. Each stream can use a
+    different scheme. The supported schemes are "base64" and "base85".
+
+    The client must encode "stdin" from binary to text before sending the
+    request and decode "stdout" and/or "stderr" from text to binary after
+    receiving the response.
 
     :param command: command path to execute
     :return: response
     """
     params = await request.json or {}
-    root = Path(app.config["EXEC_ROOT"]).resolve()  # EXEC_ROOT must be defined
+    root = Path(app.config["EXEC_ROOT"]).resolve()
     command = root.joinpath(command)
-    if not app.config.get("FOLLOW_LINKS", False):
-        # Command must be under root after following links.
+    if int(app.config.get("FOLLOW_LINKS", 0)) == 0:
+        # Command must be under root after following links. FOLLOW_LINKS can
+        # come from a bool in the config file or an int environment variable.
         command = command.resolve()
     if not command.is_relative_to(root) or not command.is_file():
         # Only allow commands within the configured root path.
@@ -78,7 +91,7 @@ async def run(command):
 
 
 async def _exec(argv: Sequence, stdin=None, binary=None):
-    """ Execute a command on the host.
+    """  Execute a command on the host.
 
     :param argv: command arguments
     :param stdin: optional text value of stdin
