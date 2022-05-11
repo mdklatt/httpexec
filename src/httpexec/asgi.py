@@ -17,15 +17,9 @@ __all__ = "app",
 app = Quart(__name__)
 
 
-_decodings = {
-    "base64": b64decode,
-    "base85": a85decode,
-}
-
-
-_encodings = {
-    "base64": b64encode,
-    "base85": a85encode,
+_encoding_schemes = {
+    "base64": (b64encode, b64decode),
+    "base85": (a85encode, a85decode),
 }
 
 
@@ -43,7 +37,7 @@ def config():
 
 
 @app.route("/<path:command>", methods=["POST"])
-async def run(command):
+async def run(command: str):
     """ Run an arbitrary command.
 
     The optional POST content is a JSON object with any of these attributes:
@@ -105,11 +99,13 @@ async def _exec(argv: Sequence, stdin=None, binary=None):
         except KeyError:
             stdin = stdin.encode()
         else:
-            stdin = _decodings[scheme](stdin)
+            decode = _encoding_schemes[scheme][1]
+            stdin = decode(stdin)
     process = await create_subprocess_exec(*argv, **pipes)
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
     for stream in set(output) & set(binary or {}):
-        output[stream] = _encodings[binary[stream]](output[stream])
+        encode = _encoding_schemes[binary[stream]][0]
+        output[stream] = encode(output[stream])
     return {
         "stdout": output["stdout"].decode(),
         "stderr": output["stderr"].decode(),
