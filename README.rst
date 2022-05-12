@@ -2,7 +2,11 @@
 httpexec
 ========
 
-|badge|
+|python3.9|
+|python3.10|
+|release|
+|license|
+|tests|
 
 This is a web application for running arbitrary shell commands on its host
 via HTTP. The intended use case is to make a CLI application inside a Docker
@@ -17,49 +21,129 @@ rather than `publishing`_ it so that access will be confined to other
 containers on the local Docker network.
 
 
-Minimum Requirements
-====================
+---
+API
+---
 
-- Python 3.9+
+Requests
+--------
+
+``POST`` requests as ``application/json`` to ``http://<host>[:<port>]/<command>``.
+
+The ``command`` must be within the ``HTTPEXEC_EXEC_ROOT`` path.
+
+.. code-block:: json
+
+    {
+      "args": [],
+      "stdin": "",
+      "binary": {
+        "stdin": null,
+        "stdout": null,
+        "stderr": null
+      }
+    }
+
+
+Responses
+---------
+
+If the command was executed, a ``200`` (``OK``) status is returned along with
+a JSON response. This does not mean that the command was successful; check the
+``return`` value in the response to determine the exit status returned by the
+command.
+
+If the requested command is not found within ``HTTPEXEC_EXEC_ROOT``, a ``403``
+(``FORBIDDEN``) status is returned.
+
+.. code-block:: json
+
+    {
+      "return": 0,
+      "stdout": "",
+      "stdouerr": ""
+    }
 
 
 
+-----------
 Basic Setup
-===========
+-----------
 
-Install for the current user:
+Installation
+-------------
 
-.. code-block:: console
-
-    $ python -m pip install . --user
-
-
-Run the application:
+Install the application.
 
 .. code-block:: console
 
-    $ python -m httpexec --help
+    $ python -m venv .venv
+    $ source .venv/bin/activate
+    (.venv) $ python -m pip install .
 
 
-Run the test suite:
+Install an `ASGI server`_, *e.g.* `Hypercorn`_.
+
+.. code-block:: console
+
+    (.venv) $ python -m pip install hypercorn
+
+
+Running
+-------
+
+Run the ASGI server:
 
 .. code-block:: console
    
-    $ pytest test/
+    (.venv) $ python -m hypercorn --error-logfile - --access-logfile - --bind 127.0.0.1:8000 httpexec.asgi:app
 
 
-Build documentation:
+Configuration
+-------------
+
+**TODO**
+
+-----------
+Development
+-----------
+
+Install additional development requirements:
 
 .. code-block:: console
 
-    $ sphinx-build -b html doc doc/_build/html
+    (.venv) $ python -m pip install -r requirements-dev.txt -e .
+
+Run tests
+---------
+
+.. code-block:: console
+
+    (.venv) $ python -m pytest tests/
 
 
-.. _GitHub Actions: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml
-.. |badge| image:: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml/badge.svg
-    :alt: GitHub Actions test status
+Build documentation
+-------------------
+
+**TODO**
+
+
+.. |python3.9| image:: https://img.shields.io/static/v1?label=python&message=3.9&color=informational
+    :alt: Python 3.9
+.. |python3.10| image:: https://img.shields.io/static/v1?label=python&message=3.10&color=informational
+    :alt: Python 3.10
+.. |release| image:: https://img.shields.io/github/v/release/mdklatt/httpexec?sort=semver
+    :alt: GitHub release (latest SemVer)
+.. |license| image:: https://img.shields.io/github/license/mdklatt/httpexec
+    :alt: MIT License
+    :target: `MIT License`_
+.. |tests| image:: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml/badge.svg
+    :alt: CI Tests
     :target: `GitHub Actions`_
+
+.. _MIT License: https://choosealicense.com/licenses/mit
+.. _GitHub Actions: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml
 .. _EXPOSE: https://docs.docker.com/engine/reference/builder/#expose
 .. _publishing: https://docs.docker.com/config/containers/container-networking/
-.. _pytest: http://pytest.org
-.. _Sphinx: http://sphinx-doc.org
+.. _ASGI server: https://asgi.readthedocs.io/en/latest/implementations.html
+.. _Hypercorn: https://pgjones.gitlab.io/hypercorn
