@@ -13,9 +13,14 @@ _config = {
     "url": "https://github.com/mdklatt/httpexec",
     "author": "Michael Klatt",
     "author_email": "mdklatt@alumni.ou.edu",
+    "python_requires": ">=3.9",
     "package_dir": {"": "src"},
     "packages": find_packages("src"),
     "data_files": ("etc/",),
+    "install_requires": [
+        "quart>=0.17.0,<1",
+        "toml>=0.10.2,<1",
+    ]
 }
 
 
