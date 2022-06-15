@@ -92,6 +92,8 @@ async def _exec(argv: Sequence, stdin=None, binary=None):
     :param binary: mapping of binary encodings for I/O streams
     """
     pipes = dict.fromkeys(("stdout", "stderr"), PIPE)
+    if not binary:
+        binary = {}
     if stdin is not None:
         pipes["stdin"] = PIPE
         try:
@@ -103,7 +105,7 @@ async def _exec(argv: Sequence, stdin=None, binary=None):
             stdin = decode(stdin)
     process = await create_subprocess_exec(*argv, **pipes)
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
-    for stream in set(output) & set(binary or {}):
+    for stream in set(output) & set(binary):
         encode = _encoding_schemes[binary[stream]][0]
         output[stream] = encode(output[stream])
     return {

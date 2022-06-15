@@ -32,6 +32,7 @@ def client():
 @pytest.mark.parametrize(("scheme", "encode", "decode"), (
     ("base64", b64encode, b64decode),
     ("base85", a85encode, a85decode),
+    (None, None, None),
 ))
 async def test_command(client, endpoint, status, scheme, encode, decode):
     """ Test command execution.
@@ -39,16 +40,17 @@ async def test_command(client, endpoint, status, scheme, encode, decode):
     """
     params = {
         "args": ["-n"],
-        "stdin": encode(b"abc").decode(),
-        "binary": dict.fromkeys(("stdin", "stdout"), scheme)
+        "stdin": encode(b"abc").decode() if encode else "abc",
     }
+    if scheme:
+        params["binary"] = dict.fromkeys(("stdin", "stdout"), scheme)
     response = await client.post(endpoint, json=params)
     assert response.status_code == status
     if status == OK:
         data = await response.json
         assert data["return"] == 0
         assert data["stderr"] == ""
-        stdout = decode(data["stdout"]).decode()
+        stdout = decode(data["stdout"]).decode() if decode else data["stdout"]
         assert stdout.strip() == "1\tabc"
     return
 
