@@ -1,26 +1,19 @@
+# Ignore Python envrionments.
+
+.python-version
+.venv*/
+
+
 # Ignore Python build artifacts.
 
-MANIFEST
-build/
-dist/
 *.egg-info/
 *.pyc
 *.pyo
 
 
-# Ignore pyenv files.
+# Ignore Make artifacts.
 
-.python-version
-
-
-# Ignore virtualenv environments.
-
-.venv*/
-
-
-# Ignore Vagrant runtime files.
-
-.vagrant/
+**/.make-update
 
 
 # Ignore settings for various IDEs.

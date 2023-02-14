@@ -108,18 +108,20 @@ Configuration
 Development
 -----------
 
-Install additional development requirements:
+Set up a development environment:
 
 .. code-block:: console
 
-    (.venv) $ python -m pip install -r requirements-dev.txt -e .
+    $ make dev
 
 Run tests
 ---------
 
+Run all tests:
+
 .. code-block:: console
 
-    (.venv) $ python -m pytest tests/
+    $ make test
 
 
 Build documentation
