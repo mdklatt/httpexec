@@ -12,7 +12,7 @@ from toml import dumps
 
 
 @pytest.fixture(scope="module")
-def server(tmp_path_factory):
+def server(tmp_path_factory, unused_tcp_port_factory):
     """ Serve the app using Hypercorn.
 
     :yield: test client
@@ -22,7 +22,7 @@ def server(tmp_path_factory):
         "HTTPEXEC_CONFIG_PATH": str(config),
     }
     config.write_text(dumps({"EXEC_ROOT": "/bin"}))
-    address = "0.0.0.0:8888"
+    address = f"0.0.0.0:{unused_tcp_port_factory()}"
     command = f"{executable} -m hypercorn -b {address} httpexec.asgi:app"
     process = Popen(split(command), env=env)
     try:
