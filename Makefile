@@ -2,6 +2,7 @@
 
 VENV = .venv
 PYTHON = . $(VENV)/bin/activate && python
+PYTEST = $(PYTHON) -m pytest
 
 
 $(VENV)/.make-update: requirements-dev.txt
@@ -17,12 +18,12 @@ dev: $(VENV)/.make-update
 
 .PHONY: test-unit
 test-unit: dev
-	$(PYTHON) -m pytest tests/unit/
+	$(PYTEST) tests/unit/
 
 
 .PHONY: test-integration
 test-integration: dev
-	$(PYTHON) -m pytest tests/integration/
+	$(PYTEST) tests/integration/
 
 
 .PHONY: test
