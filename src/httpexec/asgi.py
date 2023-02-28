@@ -24,12 +24,19 @@ _encoding_schemes = {
 
 
 @app.before_first_request
-def config():
-    """ Get configuration settings.
+async def config():
+    """ Apply configuration settings to app.
 
     """
     # Environment variables take precedence over the config file. Config file
     # keys must be ALL CAPS and at the root level.
+    #
+    # This should not need to be marked async, but doing so causes no harm,
+    # and, anecdotally, eliminates some reliability issues when `httpexec` is
+    # running inside a Docker container that is being accessed by another
+    # Docker container. Circumstantially, this is related to the use of the
+    # `quart.utils.run_sync()` adapter to run a synchronous function.
+    # See <https://github.com/mdklatt/httpexec/issues/1>.
     file = Path(environ.get("HTTPEXEC_CONFIG_PATH",  "etc/config.toml"))
     app.config.from_file(Path.cwd() / file, load)
     app.config.from_prefixed_env("HTTPEXEC")
