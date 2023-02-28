@@ -49,9 +49,9 @@ Responses
 ---------
 
 If the command was executed, a ``200`` (``OK``) status is returned along with
-a JSON response. This does not mean that the command was successful; check the
-``return`` value in the response to determine the exit status returned by the
-command.
+a JSON response. This does **not** mean that the command itself was successful.
+The ``return`` value in the response must be used to determine the exit status
+returned by the command.
 
 If the requested command is not found within ``HTTPEXEC_EXEC_ROOT``, a ``403``
 (``FORBIDDEN``) status is returned.
@@ -61,7 +61,7 @@ If the requested command is not found within ``HTTPEXEC_EXEC_ROOT``, a ``403``
     {
       "return": 0,
       "stdout": "",
-      "stdouerr": ""
+      "stderr": ""
     }
 
 
