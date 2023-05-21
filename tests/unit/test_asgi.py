@@ -4,6 +4,7 @@
 from base64 import a85decode, a85encode, b64decode, b64encode
 from http.client import OK, FORBIDDEN
 from os import environ
+from pathlib import Path
 
 import pytest
 from httpexec.asgi import *  # test __all__
@@ -17,17 +18,17 @@ def client():
     """
     environ.update({
         "QUART_TESTING": "1",
-        "HTTPEXEC_EXEC_ROOT": "/bin",
+        "HTTPEXEC_EXEC_ROOT": str(Path.cwd() / "tests/assets/"),
     })
     return app.test_client()
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("endpoint", "status"), (
-    ("cat", OK),
-    ("/cat", OK),  # Quart strips leading slashes
-    ("../cat", FORBIDDEN),  # cannot leave root
-    ("does_not_exist", FORBIDDEN),
+    ("echo", OK),
+    ("/echo", OK),  # Quart strips leading slashes
+    ("../echo", FORBIDDEN),  # cannot leave root
+    ("none", FORBIDDEN),
 ))
 @pytest.mark.parametrize(("scheme", "encode", "decode"), (
     ("base64", b64encode, b64decode),
@@ -39,7 +40,7 @@ async def test_command(client, endpoint, status, scheme, encode, decode):
 
     """
     params = {
-        "args": ["-n"],
+        "args": ["-o", "opt"],
         "stdin": encode(b"abc").decode() if encode else "abc",
     }
     if scheme:
@@ -49,9 +50,9 @@ async def test_command(client, endpoint, status, scheme, encode, decode):
     if status == OK:
         data = await response.json
         assert data["return"] == 0
-        assert data["stderr"] == ""
+        assert "opt" in data["stderr"]
         stdout = decode(data["stdout"]).decode() if decode else data["stdout"]
-        assert stdout.strip() == "1\tabc"
+        assert stdout == "abc"
     return
 
 
@@ -68,8 +69,8 @@ async def test_symlinks(client, tmp_path, follow, status):
         "EXEC_ROOT": tmp_path,
         "FOLLOW_LINKS": follow
     })
-    tmp_path.joinpath("cat").symlink_to("/bin/cat")
-    response = await client.post("cat")
+    tmp_path.joinpath("link").symlink_to(Path.cwd() / "tests/assets/echo")
+    response = await client.post("link")
     assert response.status_code == status
     return
 

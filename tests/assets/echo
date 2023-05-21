@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+""" Test application to exercise STDIN, STDOUT, and STDERR.
+
+"""
+from argparse import ArgumentParser
+from os import environ
+from sys import stdin, stderr, stdout
+
+
+def main() -> int:
+    """ Echo the contents of STDIN to STDOUT.
+
+    :return: system exit code
+    """
+    parser = ArgumentParser()
+    parser.add_argument("-o", help="sample option")
+    args = parser.parse_args()
+    if args.o:
+        stderr.write(f"Received option value '{args.o}'\n")
+    stdout.buffer.write(stdin.buffer.read())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
