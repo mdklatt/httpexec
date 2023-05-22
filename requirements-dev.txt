@@ -1,4 +1,5 @@
 aiohttp==3.8.4
 hypercorn==0.14.3
+openapi-spec-validator>=0.5.6,<0.6.0
 pytest==7.3.1
 pytest-asyncio==0.21.0

@@ -29,3 +29,16 @@ test-integration: dev
 
 .PHONY: test
 test: test-unit test-integration
+
+
+.PHONY: lint-openapi
+lint-openapi: dev
+	$(PYTHON) -m openapi_spec_validator openapi.yaml
+
+
+.PHONY: lint
+lint: lint-openapi
+
+
+.PHONY: check
+check: lint test

@@ -1,0 +1,106 @@
+openapi: "3.1.0"
+info:
+  title: "httpexec REST API"
+  version: "1.0.0"
+paths:
+  /{command}:
+    parameters:
+      - name: "command"
+        description: |
+          "Command path. Must resolve to a location under EXEC_ROOT."
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      description: "Execute a remote command."
+      requestBody:
+        description: "Command execution parameters."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                args:
+                  description: "Command arguments."
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                stdin:
+                  description: "STDIN parameters."
+                  type: object
+                  nullable: true
+                  properties:
+                    content:
+                      description: "Contents to pass to command STDIN."
+                      type: string
+                      nullable: true
+                      default: null
+                    encode:
+                      description: "Binary encoding scheme."
+                      type: string
+                      nullable: true
+                      default: null
+                      enum:
+                        - "base64"
+                        - "base85"
+                        - null
+                stderr:
+                  description: "STDERR parameters."
+                  type: object
+                  properties:
+                    capture:
+                      description: "Capture STDERR from command."
+                      type: boolean
+                      default: false
+                    encode:
+                      description: "Binary encoding scheme."
+                      type: string
+                      nullable: true
+                      default: null
+                      enum:
+                        - "base64"
+                        - "base85"
+                        - null
+                stdout:
+                  description: "STDOUT parameters."
+                  type: object
+                  properties:
+                    capture:
+                      description: "Capture STDERR from command."
+                      type: boolean
+                      default: false
+                    encode:
+                      description: "Binary encoding scheme."
+                      type: string
+                      nullable: true
+                      default: null
+                      enum:
+                        - "base64"
+                        - "base85"
+                        - null
+                environment:
+                  description: Environment variable overrides
+                  type: object
+      responses:
+        "200":
+          description: "Command was executed."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  return:
+                    description: "Command exit status."
+                    type: integer
+                  stderr:
+                    description: "Command STDERR (possibly encoded)."
+                    type: string
+                  stdout:
+                    description: "Command STDOUT (possibly encoded)."
+                    type: string
+        "404":
+          description: "Command could not be found."
+        "500":
+          description: "Command could not be executed."
