@@ -13,7 +13,7 @@ _config = {
     "url": "https://github.com/mdklatt/httpexec",
     "author": "Michael Klatt",
     "author_email": "mdklatt@alumni.ou.edu",
-    "python_requires": ">=3.9",
+    "python_requires": ">=3.9, <3.11",
     "package_dir": {"": "src"},
     "packages": find_packages("src"),
     "data_files": ("etc/",),

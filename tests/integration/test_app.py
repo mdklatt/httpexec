@@ -26,7 +26,7 @@ def server(tmp_path_factory, unused_tcp_port_factory):
     command = f"{executable} -m hypercorn -b {address} httpexec.asgi:app"
     process = Popen(split(command), env=env)
     try:
-        sleep(0.5)  # wait for app to start
+        sleep(2.0)  # wait for app to start
         yield address
     finally:
         process.kill()

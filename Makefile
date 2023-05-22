@@ -7,7 +7,8 @@ PYTEST = $(PYTHON) -m pytest
 
 $(VENV)/.make-update: requirements-dev.txt
 	python -m venv $(VENV)
-	$(PYTHON) -m pip install -U pip && for req in $^; do pip install -r "$$req"; done
+	$(PYTHON) -m pip install -U "pip==22.3.1" "setuptools==62.2.0" # TODO: still need setup.py for now
+	for req in $^; do $(PYTHON) -m pip install -r "$$req"; done
 	$(PYTHON) -m pip install -e .
 	touch $@
 
