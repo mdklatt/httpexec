@@ -38,9 +38,13 @@ async def test_run(server):
     """ Verify that the application is running as expected
 
     """
-    async with ClientSession(f"http://{server}").post("/ls") as response:
-        assert response.status == OK
-        result = await response.json()
+    async with ClientSession(f"http://{server}") as session:
+        params = {
+            "stdout": {"capture": True},
+        }
+        async with session.post("/ls", json=params) as response:
+            assert response.status == OK
+            result = await response.json()
     assert result["return"] == 0
     assert "tests" in result["stdout"]
     return
