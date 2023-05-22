@@ -5,12 +5,12 @@ from __future__ import annotations
 
 from asyncio.subprocess import create_subprocess_exec, DEVNULL, PIPE
 from base64 import a85decode, a85encode, b64decode, b64encode
-from http.client import FORBIDDEN
+from http.client import NOT_FOUND
 from os import environ
 from pathlib import Path
 from quart import Quart, jsonify, request
 from toml import load
-from typing import Optional, Sequence
+from typing import Sequence
 
 
 __all__ = "app",
@@ -80,12 +80,14 @@ async def run(command: str):
     root = Path(app.config["EXEC_ROOT"]).resolve()
     command = root.joinpath(command)
     if int(app.config.get("FOLLOW_LINKS", 0)) == 0:
-        # Command must be under root after following links. FOLLOW_LINKS can
-        # come from a bool in the config file or an int environment variable.
+        # FOLLOW_LINKS can come from a bool in the config file or an int
+        # environment variable. By default, a link cannot be used to escape
+        # EXEC_ROOT. If FOLLOW_LINKS is true, only the link itself must be
+        # under EXEC_ROOT.
         command = command.resolve()
-    if not command.is_relative_to(root) or not command.is_file():
+    if not (command.is_relative_to(root) and command.is_file()):
         # Only allow commands within the configured root path.
-        return f"Access denied to `{command}`", FORBIDDEN
+        return f"Command `{command}` not found", NOT_FOUND
     params = await request.json or {}
     argv = [str(command)] + params.get("args", [])
     streams = {key: params.get(key, {}) for key in ("stdin", "stderr", "stdout")}

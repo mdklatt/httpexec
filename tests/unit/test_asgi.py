@@ -2,7 +2,7 @@
 
 """
 from base64 import a85decode, a85encode, b64decode, b64encode
-from http.client import OK, FORBIDDEN
+from http.client import OK, NOT_FOUND
 from os import environ
 from pathlib import Path
 
@@ -27,8 +27,8 @@ def client():
 @pytest.mark.parametrize(("endpoint", "status"), (
     ("echo", OK),
     ("/echo", OK),  # Quart strips leading slashes
-    ("../echo", FORBIDDEN),  # cannot leave root
-    ("none", FORBIDDEN),  # no such command
+    ("../echo", NOT_FOUND),  # cannot leave root
+    ("none", NOT_FOUND),  # no such command
 ))
 async def test_endpoint(client, endpoint, status):
     """ Test endpoint handling.
@@ -75,7 +75,7 @@ async def test_params(client, capture, scheme, encode, decode):
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("follow", "status"), (
     (True, OK),
-    (False, FORBIDDEN),
+    (False, NOT_FOUND),
 ))
 async def test_symlinks(client, tmp_path, follow, status):
     """ Test command execution with symbolic links.
