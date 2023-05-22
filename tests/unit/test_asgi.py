@@ -28,31 +28,47 @@ def client():
     ("echo", OK),
     ("/echo", OK),  # Quart strips leading slashes
     ("../echo", FORBIDDEN),  # cannot leave root
-    ("none", FORBIDDEN),
+    ("none", FORBIDDEN),  # no such command
 ))
+async def test_endpoint(client, endpoint, status):
+    """ Test endpoint handling.
+
+    """
+    response = await client.post(endpoint)
+    assert response.status_code == status
+    return
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("capture", (True, False))
 @pytest.mark.parametrize(("scheme", "encode", "decode"), (
     ("base64", b64encode, b64decode),
     ("base85", a85encode, a85decode),
     (None, None, None),
 ))
-async def test_command(client, endpoint, status, scheme, encode, decode):
-    """ Test command execution.
+async def test_params(client, capture, scheme, encode, decode):
+    """ Test parameter handling.
 
     """
+    data = "abc"
+    stdin = encode(data.encode()).decode() if encode else data
     params = {
         "args": ["-o", "opt"],
-        "stdin": encode(b"abc").decode() if encode else "abc",
+        "stdin": {"content": stdin, "encode": scheme},
+        "stderr": {"capture": capture, "encode": scheme},
+        "stdout": {"capture": capture, "encode": scheme},
     }
-    if scheme:
-        params["binary"] = dict.fromkeys(("stdin", "stdout"), scheme)
-    response = await client.post(endpoint, json=params)
-    assert response.status_code == status
-    if status == OK:
-        data = await response.json
-        assert data["return"] == 0
-        assert "opt" in data["stderr"]
-        stdout = decode(data["stdout"]).decode() if decode else data["stdout"]
-        assert stdout == "abc"
+    response = await client.post("echo", json=params)
+    assert response.status_code == OK
+    result = await response.json
+    assert result["return"] == 0
+    if not capture:
+        return
+    if decode:
+        for key in ("stderr", "stdout"):
+            result[key] = decode(result[key]).decode()
+    assert "opt" in result["stderr"]
+    assert result["stdout"] == data
     return
 
 

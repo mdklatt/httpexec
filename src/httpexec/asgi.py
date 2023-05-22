@@ -1,14 +1,16 @@
 """ Implementation of the ASGI API.
 
 """
-from asyncio.subprocess import create_subprocess_exec, PIPE
+from __future__ import annotations
+
+from asyncio.subprocess import create_subprocess_exec, DEVNULL, PIPE
 from base64 import a85decode, a85encode, b64decode, b64encode
 from http.client import FORBIDDEN
 from os import environ
 from pathlib import Path
 from quart import Quart, jsonify, request
 from toml import load
-from typing import Sequence
+from typing import Optional, Sequence
 
 
 __all__ = "app",
@@ -75,7 +77,6 @@ async def run(command: str):
     :param command: command path to execute
     :return: response
     """
-    params = await request.json or {}
     root = Path(app.config["EXEC_ROOT"]).resolve()
     command = root.joinpath(command)
     if int(app.config.get("FOLLOW_LINKS", 0)) == 0:
@@ -85,38 +86,42 @@ async def run(command: str):
     if not command.is_relative_to(root) or not command.is_file():
         # Only allow commands within the configured root path.
         return f"Access denied to `{command}`", FORBIDDEN
+    params = await request.json or {}
     argv = [str(command)] + params.get("args", [])
-    stdin = params.get("stdin")
-    binary = params.get("binary")
-    return jsonify(await _exec(argv, stdin, binary))
+    streams = {key: params.get(key, {}) for key in ("stdin", "stderr", "stdout")}
+    result = await _exec(argv, streams)
+    return jsonify(result)
 
 
-async def _exec(argv: Sequence, stdin=None, binary=None):
+async def _exec(argv: Sequence, streams: dict) -> dict:
     """  Execute a command on the host.
+
+    STDIN is decoded if necessary before executing the command, and STDERR
+    and STDOUT are encoded.
 
     :param argv: command arguments
     :param stdin: optional text value of stdin
     :param binary: mapping of binary encodings for I/O streams
     """
-    pipes = dict.fromkeys(("stdout", "stderr"), PIPE)
-    if not binary:
-        binary = {}
+    pipes = {key: PIPE if streams[key].get("capture", False) else DEVNULL
+             for key in ("stderr", "stdout")}
+    stdin = streams["stdin"].get("content")
     if stdin is not None:
         pipes["stdin"] = PIPE
-        try:
-            scheme = binary["stdin"]
-        except KeyError:
+        scheme = streams["stdin"].get("encode")
+        if scheme is None:
             stdin = stdin.encode()
         else:
             decode = _encoding_schemes[scheme][1]
             stdin = decode(stdin)
     process = await create_subprocess_exec(*argv, **pipes)
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
-    for stream in set(output) & set(binary):
-        encode = _encoding_schemes[binary[stream]][0]
-        output[stream] = encode(output[stream])
-    return {
-        "stdout": output["stdout"].decode(),
-        "stderr": output["stderr"].decode(),
-        "return": process.returncode,
-    }
+    for key, content in output.items():
+        if content is None:
+            continue
+        scheme = streams[key].get("encode")
+        if scheme is not None:
+            encode = _encoding_schemes[scheme][0]
+            content = encode(content)
+        output[key] = content.decode()
+    return output | {"return": process.returncode}
