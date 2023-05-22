@@ -49,20 +49,21 @@ async def config():
 async def run(command: str):
     """ Run an arbitrary command.
 
-    The optional POST content is a JSON object with any of these attributes:
+    The optional POST content is a JSON object with any of these optional
+    attributes:
 
-      "args":   a list of arguments to pass to `command`
-      "stdin":  contents of STDIN to pipe to `command`
-      "binary": an object specifying any binary encodings to use for "stdin"
-                in this request and "stdout" or "stderr" in the response
+      "args":        a list of arguments to pass to `command`
+      "streams":     an object defining the parameters for `stdin`, `stderr`,
+                     and`stdout`
+      "environment": an object defining environment variable overrides
 
     The response is a JSON object with these attributes:
 
-      "return": the exit status returned by `command`
-      "stdout": the contents of STDOUT from `command`
-      "stderr": the contents of STDERR from `command`
+      "return": the exit status returned by the command
+      "stderr": the contents of STDERR from the command if `capture: true`
+      "stdout": the contents of STDOUT from the command if `capture: true`
 
-    An HTTP status of `OK` does not mean that `command` itself was successful;
+    An HTTP status of `OK` does not mean that the command itself succeeded;
     always check the value of "return" in the response object.
 
     If the contents of STDIN, STDERR, or STDOUT ar binary, they must be encoded
@@ -91,19 +92,20 @@ async def run(command: str):
     params = await request.json or {}
     argv = [str(command)] + params.get("args", [])
     streams = {key: params.get(key, {}) for key in ("stdin", "stderr", "stdout")}
-    result = await _exec(argv, streams)
+    env = params.get("environment", {})
+    result = await _exec(argv, streams, env)
     return jsonify(result)
 
 
-async def _exec(argv: Sequence, streams: dict) -> dict:
+async def _exec(argv: Sequence, streams: dict, env: dict) -> dict:
     """  Execute a command on the host.
 
     STDIN is decoded if necessary before executing the command, and STDERR
     and STDOUT are encoded.
 
-    :param argv: command arguments
-    :param stdin: optional text value of stdin
-    :param binary: mapping of binary encodings for I/O streams
+    :param argv: command line arguments
+    :param streams: STDIN, STDERR, and STDOUT parameters
+    :param env: mapping of environment variable overrides
     """
     pipes = {key: PIPE if streams[key].get("capture", False) else DEVNULL
              for key in ("stderr", "stdout")}
@@ -116,7 +118,8 @@ async def _exec(argv: Sequence, streams: dict) -> dict:
         else:
             decode = _encoding_schemes[scheme][1]
             stdin = decode(stdin)
-    process = await create_subprocess_exec(*argv, **pipes)
+    env = environ | env  # update parent environment
+    process = await create_subprocess_exec(*argv, **pipes, env=env)
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
     for key, content in output.items():
         if content is None:

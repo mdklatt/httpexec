@@ -14,7 +14,7 @@ from httpexec.asgi import *  # test __all__
 def client():
     """ Create a Quart test client.
 
-    :yield: test client
+    :return: test client
     """
     environ.update({
         "QUART_TESTING": "1",
@@ -53,7 +53,7 @@ async def test_params(client, capture, scheme, encode, decode):
     data = "abc"
     stdin = encode(data.encode()).decode() if encode else data
     params = {
-        "args": ["-o", "opt"],
+        "args": ["-e", "PATH"],
         "stdin": {"content": stdin, "encode": scheme},
         "stderr": {"capture": capture, "encode": scheme},
         "stdout": {"capture": capture, "encode": scheme},
@@ -67,8 +67,28 @@ async def test_params(client, capture, scheme, encode, decode):
     if decode:
         for key in ("stderr", "stdout"):
             result[key] = decode(result[key]).decode()
-    assert "opt" in result["stderr"]
+    assert "PATH" in result["stderr"]
     assert result["stdout"] == data
+    return
+
+
+@pytest.mark.asyncio
+async def test_environment(client):
+    """ Test the `environment` parameter.
+
+    """
+    params = {
+        "args": ["-e", "FOO"],
+        "stderr": {"capture": True},
+        "environment": {
+            "FOO": "BAR"
+        }
+    }
+    response = await client.post("echo", json=params)
+    assert response.status_code == OK
+    result = await response.json
+    assert result["return"] == 0
+    assert result["stderr"].strip() == "FOO=BAR"
     return
 
 

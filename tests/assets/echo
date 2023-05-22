@@ -13,10 +13,10 @@ def main() -> int:
     :return: system exit code
     """
     parser = ArgumentParser()
-    parser.add_argument("-o", help="sample option")
+    parser.add_argument("-e", "--env", help="display environment variable")
     args = parser.parse_args()
-    if args.o:
-        stderr.write(f"Received option value '{args.o}'\n")
+    if args.env:
+        stderr.write(f"{args.env}={environ.get(args.env, '')}\n")
     stdout.buffer.write(stdin.buffer.read())
     return 0
 
