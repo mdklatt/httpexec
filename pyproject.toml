@@ -1,0 +1,37 @@
+[project]
+name = "httpexec"
+description = "Read and write sequential data."
+authors = [
+    { name = "Michael Klatt", email = "mdklatt@alumni.ou.edu" },
+]
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+dependencies = [
+    "quart>=0.17.0,<1",
+    "toml>=0.10.2,<1",
+]
+dynamic = ["version", "readme"]
+
+[project.optional-dependencies]
+dev = [
+    "aiohttp>=3.8.4,<4",
+    "hypercorn>=0.14.3,<1",
+    "openapi-spec-validator>=0.5.6,<0.6.0",
+    "pytest>=7.3.1,<8",
+    "pytest-asyncio>=0.21.0,<1",
+    "sphinx>=7.0.1,<8",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "httpexec.__version__"}
+readme = {file = ["README.rst"], content-type = "text/x-rst"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"httpexec.etc" = ["*"]

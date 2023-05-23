@@ -5,11 +5,9 @@ PYTHON = . $(VENV)/bin/activate && python
 PYTEST = $(PYTHON) -m pytest
 
 
-$(VENV)/.make-update: requirements-dev.txt
+$(VENV)/.make-update: pyproject.toml
 	python -m venv $(VENV)
-	$(PYTHON) -m pip install -U "pip==22.3.1" "setuptools==62.2.0" # TODO: still need setup.py for now
-	for req in $^; do $(PYTHON) -m pip install -r "$$req"; done
-	$(PYTHON) -m pip install -e .
+	$(PYTHON) -m pip install -U pip -e ".[dev]"
 	touch $@
 
 
