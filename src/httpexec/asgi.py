@@ -6,10 +6,11 @@ from __future__ import annotations
 from asyncio.subprocess import create_subprocess_exec, DEVNULL, PIPE
 from base64 import a85decode, a85encode, b64decode, b64encode
 from http.client import NOT_FOUND
+from importlib import resources
 from os import environ
 from pathlib import Path
 from quart import Quart, jsonify, request
-from toml import load
+from toml import loads  # TODO: tomllib in Python 3.11+
 from typing import Sequence
 
 
@@ -29,18 +30,27 @@ _encoding_schemes = {
 async def config():
     """ Apply configuration settings to app.
 
+    Default configuration settings can be overridden with a user-supplied
+    TOML file and/or environment variables. Environment variables have the
+    highest precedence. Configuration file settings must be at the root level,
+    and the keys must be ALL CAPS.
+
     """
-    # Environment variables take precedence over the config file. Config file
-    # keys must be ALL CAPS and at the root level.
-    #
     # This should not need to be marked async, but doing so causes no harm,
     # and, anecdotally, eliminates some reliability issues when `httpexec` is
     # running inside a Docker container that is being accessed by another
     # Docker container. Circumstantially, this is related to the use of the
     # `quart.utils.run_sync()` adapter to run a synchronous function.
     # See <https://github.com/mdklatt/httpexec/issues/1>.
-    file = Path(environ.get("HTTPEXEC_CONFIG_PATH",  "etc/config.toml"))
-    app.config.from_file(Path.cwd() / file, load)
+    defaults = resources.files("httpexec").joinpath("etc/defaults.toml")
+    config = loads(defaults.read_text())
+    try:
+        path = Path(environ["HTTPEXEC_CONFIG_PATH"])
+    except KeyError:
+        pass
+    else:
+        config |= loads(path.read_text())
+    app.config.from_mapping(config)
     app.config.from_prefixed_env("HTTPEXEC")
     return
 
@@ -101,7 +111,7 @@ async def _exec(argv: Sequence, streams: dict, env: dict) -> dict:
     """  Execute a command on the host.
 
     STDIN is decoded if necessary before executing the command, and STDERR
-    and STDOUT are encoded.
+    and STDOUT are encoded for transmission back to the client.
 
     :param argv: command line arguments
     :param streams: STDIN, STDERR, and STDOUT parameters
