@@ -4,12 +4,13 @@ httpexec
 
 |python3.9|
 |python3.10|
+|python3.11|
 |release|
 |license|
 |tests|
 
-This is a web application for running arbitrary shell commands on its host
-via HTTP. The intended use case is to make a CLI application inside a Docker
+This is a web application for running arbitrary shell commands on its host via
+HTTP. The intended use case is to make a CLI application inside a Docker
 container usable from other containers.
 
 **This application allows arbitrary remote execution. Beware of using this
@@ -19,6 +20,10 @@ network.**
 When using with Docker, it is best to `EXPOSE`_ the *httpexec* listening port
 rather than `publishing`_ it so that access will be confined to other
 containers on the local Docker network.
+
+
+.. image:: docs/httpexec.png
+  :alt: httpexec System Architecture
 
 
 ---
@@ -134,13 +139,15 @@ Build documentation
     :alt: Python 3.9
 .. |python3.10| image:: https://img.shields.io/static/v1?label=python&message=3.10&color=informational
     :alt: Python 3.10
+.. |python3.11| image:: https://img.shields.io/static/v1?label=python&message=3.11&color=informational
+    :alt: Python 3.11
 .. |release| image:: https://img.shields.io/github/v/release/mdklatt/httpexec?sort=semver
     :alt: GitHub release (latest SemVer)
 .. |license| image:: https://img.shields.io/github/license/mdklatt/httpexec
     :alt: MIT License
     :target: `MIT License`_
-.. |tests| image:: https://github.com/mdklatt/httpexec/actions/workflows/tests.yml/badge.svg
-    :alt: CI Tests
+.. |tests| image:: https://github.com/mdklatt/httpexec/actions/workflows/test.yml/badge.svg
+    :alt: CI Test
     :target: `GitHub Actions`_
 
 .. _MIT License: https://choosealicense.com/licenses/mit
