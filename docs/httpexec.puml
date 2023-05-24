@@ -1,22 +1,22 @@
 @startuml
 
-' The accompanying image was created using the "PlantUML Integration" IDEA plugin.
+' The accompanying image was created using the "PlantUML Integration" plugin:
 ' <https://plugins.jetbrains.com/plugin/7017-plantuml-integration>
 
 title httpexec System Architecture
 
 node "REST Client" as client {
-    ' Local/remote clients fed by the LDM service
+    ' Remote clients using the REST API.
 }
 
-node "Remote Host" {
+node "Local Host" {
+    ' Server where httpexec is running.
 	component "httpexec" as httpexec
     component "Web Server" as server
 	component "Command" as command
 }
 
-
-client .right. server : HTTP
+server .right. client : HTTP
 server -down- httpexec : ASGI
 httpexec -right- command : CLI
 
