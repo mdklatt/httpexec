@@ -74,7 +74,7 @@ data.
     {
       "return": 0,
       "stderr": null,
-      "stdout": "YmluYXJ5IGRhdGE="
+      "stdout": {"content": "YmluYXJ5IGRhdGE=", "encode": "base64"}
     }
 
 
