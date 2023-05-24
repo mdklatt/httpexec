@@ -1,3 +1,4 @@
+---
 openapi: "3.1.0"
 info:
   title: "httpexec REST API"
@@ -56,8 +57,8 @@ paths:
                       default: false
                     encode:
                       description: "Binary encoding scheme."
-                      type: string
                       nullable: true
+                      type: string
                       default: null
                       enum:
                         - "base64"
@@ -73,8 +74,8 @@ paths:
                       default: false
                     encode:
                       description: "Binary encoding scheme."
-                      type: string
                       nullable: true
+                      type: string
                       default: null
                       enum:
                         - "base64"
@@ -95,11 +96,37 @@ paths:
                     description: "Command exit status."
                     type: integer
                   stderr:
-                    description: "Command STDERR (possibly encoded)."
-                    type: string
+                    description: "Command STDERR output."
+                    nullable: true
+                    type: object
+                    properties:
+                      content:
+                        description: stream content
+                        type: string
+                      encode:
+                        description: "Binary encoding scheme."
+                        nullable: true
+                        type: string
+                        enum:
+                          - "base64"
+                          - "base85"
+                          - null
                   stdout:
-                    description: "Command STDOUT (possibly encoded)."
-                    type: string
+                    description: "Command STDOUT output (possibly encoded)."
+                    nullable: true
+                    type: object
+                    properties:
+                      content:
+                        description: stream content
+                        type: string
+                      encode:
+                        description: "Binary encoding scheme."
+                        nullable: true
+                        type: string
+                        enum:
+                          - "base64"
+                          - "base85"
+                          - null
         "404":
           description: "Command could not be found."
         "500":

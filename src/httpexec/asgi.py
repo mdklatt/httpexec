@@ -139,5 +139,8 @@ async def _exec(argv: Sequence, streams: dict, env: dict) -> dict:
         if scheme is not None:
             encode = _encoding_schemes[scheme][0]
             content = encode(content)
-        output[key] = content.decode()
+        output[key] = {
+            "content": content.decode(),
+            "encode": scheme,
+        }
     return output | {"return": process.returncode}

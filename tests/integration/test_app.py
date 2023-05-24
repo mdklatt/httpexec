@@ -46,7 +46,7 @@ async def test_run(server):
             assert response.status == OK
             result = await response.json()
     assert result["return"] == 0
-    assert "tests" in result["stdout"]
+    assert "tests" in result["stdout"]["content"]
     return
 
 
