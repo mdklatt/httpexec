@@ -15,6 +15,11 @@ $(VENV)/.make-update: pyproject.toml
 dev: $(VENV)/.make-update
 
 
+.PHONY: docs
+docs: dev
+	$(PYTHON) -m sphinx -M html docs docs/_build
+
+
 .PHONY: test-unit
 test-unit: dev
 	$(PYTEST) tests/unit/
