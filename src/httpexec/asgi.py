@@ -52,6 +52,7 @@ async def config():
         config |= loads(path.read_text())
     app.config.from_mapping(config)
     app.config.from_prefixed_env("HTTPEXEC")
+    app.logger.setLevel(app.config.get("LOGGING_LEVEL"))
     return
 
 
