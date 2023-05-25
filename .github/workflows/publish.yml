@@ -1,27 +1,25 @@
 ---
-name: Publish - Test PyPI
+name: Publish
 
 on:
   # TODO: Disable automatic triggers until more experience is gained with this.
   # push:
   #   branches:
-  #     - dev
+  #     - main
   workflow_dispatch:  # manual trigger via the GitHub UI
 
 jobs:
   publish:
-    name: Build packages and publish to Test PyPI
+    name: Build packages and publish to PyPI
     runs-on: ubuntu-latest
     environment:
-      name: pypi-test
-      url: https://test.pypi.org/project/httpexec
+      name: pypi
+      url: https://pypi.org/project/httpexec
     permissions:
       id-token: write  # needed for OIDC trusted publishing
     steps:
       - name: Check out project
         uses: actions/checkout@v3
-        with:
-          ref: dev  # TODO: don't use with automatic triggers
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -34,8 +32,7 @@ jobs:
         run: |
           python -m pytest tests/
           python -m twine check dist/*
-      - name: Publish packages to Test PyPI
+      - name: Publish packages to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
-          repository-url: https://test.pypi.org/legacy/
