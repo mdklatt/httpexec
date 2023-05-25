@@ -62,16 +62,17 @@ async def test_params(client, capture, scheme, encode, decode):
     assert response.status_code == OK
     result = await response.json
     assert result["return"] == 0
-    if not capture:
-        return
-    if decode:
-        for key in ("stderr", "stdout"):
-            stream = result[key]
-            stream["content"] = decode(stream["content"]).decode()
-    assert "PATH" in result["stderr"]["content"]
-    assert result["stderr"]["encode"] == scheme
-    assert result["stdout"]["content"] == data
-    assert result["stdout"]["encode"] == scheme
+    if capture:
+        if decode:
+            for key in ("stderr", "stdout"):
+                stream = result[key]
+                stream["content"] = decode(stream["content"]).decode()
+        assert "PATH" in result["stderr"]["content"]
+        assert result["stderr"]["encode"] == scheme
+        assert result["stdout"]["content"] == data
+        assert result["stdout"]["encode"] == scheme
+    else:
+        assert all(result[key] is None for key in ("stderr", "stdout"))
     return
 
 
