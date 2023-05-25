@@ -35,12 +35,14 @@ dynamic = ["version", "readme"]
 [project.optional-dependencies]
 dev = [
     "aiohttp>=3.8.4,<4",
+    "build>=0.10.0,<1",
     "hypercorn>=0.14.3,<1",
     "openapi-spec-validator>=0.5.6,<0.6.0",
     "pytest>=7.3.1,<8",
     "pytest-asyncio>=0.21.0,<1",
     "sphinx>=6.2.1,<7",
     "sphinx_rtd_theme>=1.2.1,<2",
+    "twine>=4.0.2,<5"
 ]
 
 [build-system]

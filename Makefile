@@ -1,8 +1,10 @@
 # Project management tasks.
 
 VENV = .venv
+DIST = dist
 PYTHON = . $(VENV)/bin/activate && python
 PYTEST = $(PYTHON) -m pytest
+BUILD = $(PYTHON) -m build --outdir=$(DIST)
 
 
 $(VENV)/.make-update: pyproject.toml
@@ -45,3 +47,18 @@ lint: lint-openapi
 
 .PHONY: check
 check: lint test
+
+
+.PHONY: sdist
+sdist: dev check
+	$(BUILD) --sdist .
+
+
+.PHONY: wheel
+wheel: dev check
+	$(BUILD) --wheel .
+
+
+.PHONY: build
+build: sdist wheel
+	$(PYTHON) -m twine check $(DIST)/*

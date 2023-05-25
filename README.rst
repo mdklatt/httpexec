@@ -266,7 +266,7 @@ Run all tests and linters:
     $ make check
 
 
-Build documentation
+Build Documentation
 -------------------
 
 Build HTML documentation using `Sphinx`_:
@@ -274,6 +274,16 @@ Build HTML documentation using `Sphinx`_:
 .. code-block:: console
 
     $ make docs
+
+
+Build Package
+-------------
+
+Build source and `wheel`_ packages. This will run all checks first.
+
+.. code-block:: console
+
+    $ make build
 
 
 .. |python3.9| image:: https://img.shields.io/static/v1?label=python&message=3.9&color=informational
@@ -306,3 +316,4 @@ Build HTML documentation using `Sphinx`_:
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _TOML: https://toml.io/en/
 .. _user-defined bridge network: https://docs.docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-networks
+.. _wheel: https://peps.python.org/pep-0491/
