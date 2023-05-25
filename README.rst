@@ -5,8 +5,9 @@ httpexec
 |python3.9|
 |python3.10|
 |python3.11|
-|release|
 |license|
+|release|
+|pypi|
 |tests|
 
 *httpexec* is an `Asynchronous Server Gateway Interface`_ (ASGI) application
@@ -107,7 +108,7 @@ server:
 
 .. code-block:: console
 
-    $ python -m pip "httpexec @ git+https://github.com/mdklatt/httpexec" "hypercorn>=0.14.3,<1"
+    $ python -m pip install httpexec "hypercorn>=0.14.3,<1"
 
 
 Configuration
@@ -287,16 +288,19 @@ Build source and `wheel`_ packages. This will run all checks first.
 
 
 .. |python3.9| image:: https://img.shields.io/static/v1?label=python&message=3.9&color=informational
-    :alt: Python 3.9
+   :alt: Python 3.9
 .. |python3.10| image:: https://img.shields.io/static/v1?label=python&message=3.10&color=informational
-    :alt: Python 3.10
+   :alt: Python 3.10
 .. |python3.11| image:: https://img.shields.io/static/v1?label=python&message=3.11&color=informational
-    :alt: Python 3.11
+   :alt: Python 3.11
 .. |release| image:: https://img.shields.io/github/v/release/mdklatt/httpexec?sort=semver
-    :alt: GitHub release (latest SemVer)
+   :alt: GitHub release (latest SemVer)
+.. |pypi| image:: https://img.shields.io/pypi/v/httpexec
+   :alt: PyPI
+   :target: `PyPI`_
 .. |license| image:: https://img.shields.io/github/license/mdklatt/httpexec
-    :alt: MIT License
-    :target: `MIT License`_
+   :alt: MIT License
+   :target: `MIT License`_
 .. |tests| image:: https://github.com/mdklatt/httpexec/actions/workflows/test.yml/badge.svg
     :alt: CI Test
     :target: `GitHub Actions`_
@@ -312,6 +316,7 @@ Build source and `wheel`_ packages. This will run all checks first.
 .. _LXC: https://linuxcontainers.org/
 .. _MIT License: https://choosealicense.com/licenses/mit
 .. _OpenAPI: https://www.openapis.org/
+.. _PyPI: https://pypi.org/project/httpexec/
 .. _Python logging: https://docs.python.org/3/howto/logging.html
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _TOML: https://toml.io/en/
