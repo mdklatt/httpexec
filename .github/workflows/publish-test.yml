@@ -2,11 +2,11 @@
 name: Publish - Test PyPI
 
 on:
-  # TODO: Disable automatic triggers until more experience is gained with this.
-  # push:
-  #   branches:
-  #     - dev
-  workflow_dispatch:  # manual trigger via the GitHub UI
+  push:
+    branches:
+      # Verify new releases test.pypi.org before pushing to 'main'.
+      - dev
+    workflow_dispatch:  # allow manual trigger via the GitHub UI
 
 jobs:
   publish:
@@ -20,8 +20,6 @@ jobs:
     steps:
       - name: Check out project
         uses: actions/checkout@v3
-        with:
-          ref: dev  # TODO: don't use with automatic triggers
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
