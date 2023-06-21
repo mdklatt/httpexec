@@ -9,7 +9,8 @@ BUILD = $(PYTHON) -m build --outdir=$(DIST)
 
 $(VENV)/.make-update: pyproject.toml
 	python -m venv $(VENV)
-	$(PYTHON) -m pip install -U pip -e ".[dev]"
+	$(PYTHON) -m pip install -U pip  # must be first
+	$(PYTHON) -m pip install -e ".[dev]"
 	touch $@
 
 
