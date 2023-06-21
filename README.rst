@@ -14,8 +14,8 @@ httpexec
 that allows remote clients to execute CLI commands on the local host via a
 REST API. An `ASGI-capable server`_ is also required.
 
-**There are critical security concerns when using this application.** See the
-`Security`_ section.
+**There are critical security considerations when using this application.** See
+the `Security`_ section.
 
 
 .. image:: docs/httpexec.png
@@ -109,6 +109,17 @@ server:
 .. code-block:: console
 
     $ python -m pip install httpexec "hypercorn>=0.14.3,<1"
+
+Pinned Dependencies
++++++++++++++++++++
+
+Production applications should pin their dependencies to exact versions to
+avoid unexpected breaking changes. The downside of this is that it makes it
+more difficult to receive critical updates. This application relies on
+`Semantic Versioning`_ for its own dependencies to minimize breaking changes
+while allowing for routine updates (see *pyproject.toml*). Users should use
+their packaage manager to pin this package and its dependencies to exact
+versions in a production environment.
 
 
 Configuration
@@ -318,6 +329,7 @@ Build source and `wheel`_ packages. This will run all checks first.
 .. _OpenAPI: https://www.openapis.org/
 .. _PyPI: https://pypi.org/project/httpexec/
 .. _Python logging: https://docs.python.org/3/howto/logging.html
+.. _Semantic Versioning: https://semver.org/
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _TOML: https://toml.io/en/
 .. _user-defined bridge network: https://docs.docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-networks

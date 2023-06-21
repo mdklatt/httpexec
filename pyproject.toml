@@ -23,6 +23,9 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
+    # Relying on Semantic Versioning instead of pinned versions to minimize
+    # breaking changes while making it easier to recieve critical updates.
+    # Add a rquirements.txt file for production deployments.
     "quart>=0.17.0,<1",
     "tomli>=2.0.1,<3; python_version<'3.11'"
 ]
