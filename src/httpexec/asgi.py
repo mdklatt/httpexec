@@ -10,7 +10,10 @@ from importlib import resources
 from os import environ
 from pathlib import Path
 from quart import Quart, jsonify, request
-from toml import loads  # TODO: tomllib in Python 3.11+
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:
+    import tomli as tomllib
 from typing import Sequence
 
 
@@ -43,13 +46,13 @@ async def config():
     # `quart.utils.run_sync()` adapter to run a synchronous function.
     # See <https://github.com/mdklatt/httpexec/issues/1>.
     defaults = resources.files("httpexec").joinpath("etc/defaults.toml")
-    config = loads(defaults.read_text())
+    config = tomllib.loads(defaults.read_text())
     try:
         path = Path(environ["HTTPEXEC_CONFIG_PATH"])
     except KeyError:
         pass
     else:
-        config |= loads(path.read_text())
+        config |= tomllib.loads(path.read_text())
     app.config.from_mapping(config)
     app.config.from_prefixed_env("HTTPEXEC")
     app.logger.setLevel(app.config.get("LOGGING_LEVEL"))
