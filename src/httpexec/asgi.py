@@ -111,7 +111,7 @@ async def run(command: str):
     return jsonify(result)
 
 
-async def _exec(argv: Sequence, streams: dict, env: dict) -> dict:
+async def _exec(argv: Sequence, streams: dict, env: dict | None) -> dict:
     """  Execute a command on the host.
 
     STDIN is decoded if necessary before executing the command, and STDERR
@@ -132,7 +132,7 @@ async def _exec(argv: Sequence, streams: dict, env: dict) -> dict:
         else:
             decode = _encoding_schemes[scheme][1]
             stdin = decode(stdin)
-    env = environ | env  # update parent environment
+    env = environ | (env or {})  # update parent environment
     process = await create_subprocess_exec(*argv, **pipes, env=env)
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
     for key, content in output.items():

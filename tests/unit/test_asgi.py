@@ -57,6 +57,7 @@ async def test_params(client, capture, scheme, encode, decode):
         "stdin": {"content": stdin, "encode": scheme},
         "stderr": {"capture": capture, "encode": scheme},
         "stdout": {"capture": capture, "encode": scheme},
+        "environment": None,  # test explicit null
     }
     response = await client.post("echo", json=params)
     assert response.status_code == OK

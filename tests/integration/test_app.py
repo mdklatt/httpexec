@@ -41,6 +41,7 @@ async def test_run(server):
     async with ClientSession(f"http://{server}") as session:
         params = {
             "stdout": {"capture": True},
+            "environment": None,  # test explicit null
         }
         async with session.post("/ls", json=params) as response:
             assert response.status == OK
