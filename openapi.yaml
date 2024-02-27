@@ -84,6 +84,7 @@ paths:
                 environment:
                   description: Environment variable overrides
                   type: object
+                  nullable: true
       responses:
         "200":
           description: "Command was executed."
