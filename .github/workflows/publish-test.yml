@@ -6,7 +6,7 @@ on:
     branches:
       # Verify new releases test.pypi.org before pushing to 'main'.
       - dev
-    workflow_dispatch:  # allow manual trigger via the GitHub UI
+  workflow_dispatch:  # allow manual trigger via the GitHub UI
 
 jobs:
   publish:
