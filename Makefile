@@ -2,13 +2,13 @@
 
 VENV = .venv
 DIST = dist
-PYTHON = . $(VENV)/bin/activate && python
+PYTHON = . $(VENV)/bin/activate && python3
 PYTEST = $(PYTHON) -m pytest
 BUILD = $(PYTHON) -m build --outdir=$(DIST)
 
 
 $(VENV)/.make-update: pyproject.toml
-	python -m venv $(VENV)
+	python3 -m venv $(VENV)
 	$(PYTHON) -m pip install -U pip  # must be first
 	$(PYTHON) -m pip install -e ".[dev]"
 	touch $@

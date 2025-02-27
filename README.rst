@@ -5,6 +5,8 @@ httpexec
 |python3.9|
 |python3.10|
 |python3.11|
+|python3.12|
+|python3.13|
 |license|
 |release|
 |pypi|
@@ -304,6 +306,10 @@ Build source and `wheel`_ packages. This will run all checks first.
    :alt: Python 3.10
 .. |python3.11| image:: https://img.shields.io/static/v1?label=python&message=3.11&color=informational
    :alt: Python 3.11
+.. |python3.12| image:: https://img.shields.io/static/v1?label=python&message=3.12&color=informational
+   :alt: Python 3.12
+.. |python3.13| image:: https://img.shields.io/static/v1?label=python&message=3.13&color=informational
+   :alt: Python 3.13
 .. |release| image:: https://img.shields.io/github/v/release/mdklatt/httpexec?sort=semver
    :alt: GitHub release (latest SemVer)
 .. |pypi| image:: https://img.shields.io/pypi/v/httpexec
