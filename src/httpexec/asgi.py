@@ -130,16 +130,20 @@ async def _exec(argv: Sequence, streams: dict, env: dict | None) -> dict:
         if scheme is None:
             stdin = stdin.encode()
         else:
+            app.logger.debug(f"Decoding contents of stdin using {scheme}")
             decode = _encoding_schemes[scheme][1]
             stdin = decode(stdin)
     env = environ | (env or {})  # update parent environment
+    app.logger.info(f"Executing {argv}")
     process = await create_subprocess_exec(*argv, **pipes, env=env)
+    app.logger.debug(f"{argv[0]} returned {process.returncode}")
     output = dict(zip(("stdout", "stderr"), await process.communicate(stdin)))
     for key, content in output.items():
         if content is None:
             continue
         scheme = streams[key].get("encode")
         if scheme is not None:
+            app.logger.debug(f"Encoding contents of {key} using {scheme}")
             encode = _encoding_schemes[scheme][0]
             content = encode(content)
         output[key] = {

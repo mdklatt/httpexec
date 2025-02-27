@@ -19,11 +19,14 @@ def server(tmp_path_factory, unused_tcp_port_factory):
     """
     config = tmp_path_factory.mktemp("test_app") / "config.toml"
     env = {
+        # Variables intended for the application itself must be prefixed with
+        # HTTPEXEC.
         "HTTPEXEC_CONFIG_PATH": str(config),
+        "HTTPEXEC_LOGGING_LEVEL": "DEBUG",
     }
     config.write_text(dumps({"EXEC_ROOT": "/bin"}))
     address = f"0.0.0.0:{unused_tcp_port_factory()}"
-    command = f"{executable} -m hypercorn -b {address} httpexec.asgi:app"
+    command = f"{executable} -m hypercorn -b {address} --log-level DEBUG httpexec.asgi:app"
     process = Popen(split(command), env=env)
     try:
         sleep(2.0)  # wait for app to start
