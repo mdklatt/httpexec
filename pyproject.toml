@@ -46,7 +46,7 @@ dev = [
     "pytest-asyncio>=0.21.0,<1",
     "sphinx>=6.2.1,<7",
     "sphinx_rtd_theme>=1.2.1,<2",
-    "twine>=4.0.2,<5",
+    "twine>=6.1.0,<7",
 ]
 
 [build-system]
