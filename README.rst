@@ -218,13 +218,12 @@ User Isolation
 --------------
 
 Docker best practices dictate that a container runs as a non-privileged user.
-The UID the container is running as can only access host resources with the
-same permissions as that UID on the host (the respective user names are
-irrelevant). Ensure that the container does not run as ``root`` (UID ``0``).
-Run the container as a UID that does not exist on the host for maximum
-isolation. In both container and non-container environments, do not run
-*httpexec* and/or the web server as a UID that has more access than is
-necessary.
+The UID the container is running as has the same permissions as that UID on the
+host (the respective user names are irrelevant). Ensure that the container does
+not run as ``root`` (UID ``0``). Run the container as a UID that does not exist
+on the host for maximum isolation. In both container and non-container
+environments, do not run *httpexec* and/or the web server as a UID that has
+more access than is necessary.
 
 
 File Isolation
@@ -244,9 +243,9 @@ privileged information. A Docker container does not have access to environment
 variables on the host unless they explicitly exported to it, and this a
 read-only static exchange (changes on the host will not be reflected in a
 running container). Environment isolation can also be controlled by the web
-server (see its documentation). *httpexec* also allows limited control over
-the environment, but that is limited to modifying the environment, not
-restricting access. While it is possible to unset specific environment
+server (see its documentation). The *httpexec* also allows some control over the
+target command's environment, but that is limited to modifying the environment,
+not restricting access. While it is possible to unset specific environment
 variables as seen by the target command, this requires prior knowledge of all
 problematic variable names. In a non-container environment, a virtual
 machine will ensure a strict separation of environments, but the VM itself may
